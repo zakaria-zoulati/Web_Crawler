@@ -15,8 +15,8 @@ A simple, recursive web crawler built with Node.js that maps out all internal li
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
-cd <repo-name>
+git clone <https://github.com/zakaria-zoulati/Web_Crawler.git>
+cd <Web_Crawler>
 ```
 
 2. Install dependencies:
