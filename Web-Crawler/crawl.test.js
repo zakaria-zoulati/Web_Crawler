@@ -1,44 +1,38 @@
-const {test , expect} = require("@jest/globals") ; 
-const {normalizeURL , getURLsFromHTML} = require("./crawl.js") ; 
+const { test, expect } = require("@jest/globals");
+const { normalizeURL, getURLsFromHTML } = require("./crawl.js");
 
+test("normalizeURL slash", () => {
+  const url = "http://m.inpt.ac.ma/my";
+  const actual = normalizeURL(url);
+  const expected = "m.inpt.ac.ma/my";
+  expect(actual).toEqual(expected);
+});
 
-test("normalizeURL slash" , () =>{
-    const url =  "http://m.inpt.ac.ma/my"  ; 
-    const actual = normalizeURL(url) ; 
-    const expected = "m.inpt.ac.ma/my" ; 
-    expect(actual).toEqual(expected) ; 
+test("normalizeURL Capital", () => {
+  const url = "http://m.INPT.ac.ma/my";
+  const actual = normalizeURL(url);
+  const expected = "m.inpt.ac.ma/my";
+  expect(actual).toEqual(expected);
+});
 
-})
-
-
-test("normalizeURL Capital" , () =>{
-    const url =  "http://m.INPT.ac.ma/my"  ; 
-    const actual = normalizeURL(url) ; 
-    const expected = "m.inpt.ac.ma/my" ; 
-    expect(actual).toEqual(expected) ; 
-
-})
-
-test("getURLsFromHTML" , () =>{
-    const inputHTMLBody = `
+test("getURLsFromHTML", () => {
+  const inputHTMLBody = `
     <html>
         <body>
             <a href="http://m.INPT.ac.ma/my">
-                Click Here , You are in INPT 
+                Click Here , You are in INPT
             </a>
         </body>
     </html>
-    `
-    const inputBaseURL = "http://m.INPT.ac.ma/my" ; 
-    const actual = getURLsFromHTML(inputHTMLBody , inputBaseURL) ; 
-    const expected = ["http://m.inpt.ac.ma/my"] ;
-    expect(actual).toEqual(expected) ; 
-})
+    `;
+  const inputBaseURL = "http://m.INPT.ac.ma/my";
+  const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL);
+  const expected = ["http://m.inpt.ac.ma/my"];
+  expect(actual).toEqual(expected);
+});
 
-
-
-test("getURLsFromHTML absolute" , () =>{
-    const inputHTMLBody = `
+test("getURLsFromHTML absolute", () => {
+  const inputHTMLBody = `
     <html>
         <body>
             <a href="http://m.INPT.ac.ma/my/hy">
@@ -46,19 +40,15 @@ test("getURLsFromHTML absolute" , () =>{
             </a>
         </body>
     </html>
-    `
-    const inputBaseURL = "http://m.INPT.ac.ma/my/hy" ; 
-    const actual = getURLsFromHTML(inputHTMLBody , inputBaseURL) ; 
-    const expected = ["http://m.inpt.ac.ma/my/hy"] ;
-    expect(actual).toEqual(expected) ; 
-})
+    `;
+  const inputBaseURL = "http://m.INPT.ac.ma/my/hy";
+  const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL);
+  const expected = ["http://m.inpt.ac.ma/my/hy"];
+  expect(actual).toEqual(expected);
+});
 
-
-
-
-
-test("getURLsFromHTML relative" , () =>{
-    const inputHTMLBody = `
+test("getURLsFromHTML relative", () => {
+  const inputHTMLBody = `
     <html>
         <body>
             <a href="/Oko/Ok/id">
@@ -66,16 +56,15 @@ test("getURLsFromHTML relative" , () =>{
             </a>
         </body>
     </html>
-    `
-    const inputBaseURL = "http://m.inpt.ac.ma" ; 
-    const actual = getURLsFromHTML(inputHTMLBody , inputBaseURL) ; 
-    const expected = ["http://m.inpt.ac.ma/Oko/Ok/id"] ;
-    expect(actual).toEqual(expected) ; 
-})
+    `;
+  const inputBaseURL = "http://m.inpt.ac.ma";
+  const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL);
+  const expected = ["http://m.inpt.ac.ma/Oko/Ok/id"];
+  expect(actual).toEqual(expected);
+});
 
-
-test("getURLsFromHTML Both" , () =>{
-    const inputHTMLBody = `
+test("getURLsFromHTML Both", () => {
+  const inputHTMLBody = `
     <html>
         <body>
             <a href="/Oko/Ok/id">
@@ -87,34 +76,30 @@ test("getURLsFromHTML Both" , () =>{
 
         </body>
     </html>
-    `
-    const inputBaseURL = "http://m.inpt.ac.ma" ; 
-    const actual = getURLsFromHTML(inputHTMLBody , inputBaseURL) ; 
-    const expected = ["http://m.inpt.ac.ma/Oko/Ok/id","http://m.inpt.ac.ma/my/hy"] ;
-    expect(actual).toEqual(expected) ; 
-})
+    `;
+  const inputBaseURL = "http://m.inpt.ac.ma";
+  const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL);
+  const expected = [
+    "http://m.inpt.ac.ma/Oko/Ok/id",
+    "http://m.inpt.ac.ma/my/hy",
+  ];
+  expect(actual).toEqual(expected);
+});
 
-
-test("getURLsFromHTML Invalid" , () =>{
-    const inputHTMLBody = `
+test("getURLsFromHTML Invalid", () => {
+  const inputHTMLBody = `
     <html>
         <body>
             <a href="invalid">
-                Why Not 
+                Why Not
             </a>
 
 
         </body>
     </html>
-    `
-    const inputBaseURL = "http://m.inpt.ac.ma" ; 
-    const actual = getURLsFromHTML(inputHTMLBody , inputBaseURL) ; 
-    const expected = [] ;
-    expect(actual).toEqual(expected) ; 
-})
-
-
-
-
-
-
+    `;
+  const inputBaseURL = "http://m.inpt.ac.ma";
+  const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL);
+  const expected = [];
+  expect(actual).toEqual(expected);
+});
