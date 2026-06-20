@@ -1,12 +1,25 @@
 const { JSDOM } = require("jsdom");
 
+const USER_AGENTS = [
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+  "Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+];
+
+function randomUserAgent() {
+  return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
+
 async function crawlPage(
   baseURL,
   currentURL,
   pages,
   maxUrls = Infinity,
   maxDepth = Infinity,
-  depth = 0
+  depth = 0,
+  visited = new Set()
 ) {
   const currentUrlObj = new URL(currentURL);
   const baseUrlObj = new URL(baseURL);
@@ -21,12 +34,14 @@ async function crawlPage(
 
   const normalizedURL = normalizeURL(currentURL);
 
-  if (pages[normalizedURL] > 0) {
-    pages[normalizedURL]++;
+  if (visited.has(normalizedURL)) {
+    if (pages[normalizedURL] > 0) {
+      pages[normalizedURL]++;
+    }
     return pages;
   }
+  visited.add(normalizedURL);
 
-  // stop discovering new pages once we've hit the URL limit
   if (Object.keys(pages).length >= maxUrls) {
     return pages;
   }
@@ -36,7 +51,9 @@ async function crawlPage(
   console.log(`crawling ${currentURL}`);
   let htmlBody = "";
   try {
-    const resp = await fetch(currentURL);
+    const resp = await fetch(currentURL, {
+      headers: { "User-Agent": randomUserAgent() },
+    });
     if (resp.status > 399) {
       console.log(`Got HTTP error, status code: ${resp.status}`);
       return pages;
@@ -59,7 +76,8 @@ async function crawlPage(
       pages,
       maxUrls,
       maxDepth,
-      depth + 1
+      depth + 1,
+      visited
     );
   }
 
@@ -72,8 +90,6 @@ function getURLsFromHTML(htmlBody, baseURL) {
   const aElements = dom.window.document.querySelectorAll("a");
   for (const aElement of aElements) {
     try {
-      // resolve every href against baseURL: handles absolute, root-relative
-      // (/path) and document-relative (index.html) links alike
       urls.push(new URL(aElement.href, baseURL).href);
     } catch (err) {
       console.log(`${err.message}: ${aElement.href}`);
