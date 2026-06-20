@@ -1,9 +1,21 @@
 const { JSDOM } = require("jsdom");
 
-async function crawlPage(baseURL, currentURL, pages) {
+async function crawlPage(
+  baseURL,
+  currentURL,
+  pages,
+  maxUrls = Infinity,
+  maxDepth = Infinity,
+  depth = 0
+) {
   const currentUrlObj = new URL(currentURL);
   const baseUrlObj = new URL(baseURL);
   if (currentUrlObj.hostname !== baseUrlObj.hostname) {
+    return pages;
+  }
+
+  // stop descending once we've gone past the allowed depth
+  if (depth > maxDepth) {
     return pages;
   }
 
@@ -11,6 +23,11 @@ async function crawlPage(baseURL, currentURL, pages) {
 
   if (pages[normalizedURL] > 0) {
     pages[normalizedURL]++;
+    return pages;
+  }
+
+  // stop discovering new pages once we've hit the URL limit
+  if (Object.keys(pages).length >= maxUrls) {
     return pages;
   }
 
@@ -36,7 +53,14 @@ async function crawlPage(baseURL, currentURL, pages) {
 
   const nextURLs = getURLsFromHTML(htmlBody, baseURL);
   for (const nextURL of nextURLs) {
-    pages = await crawlPage(baseURL, nextURL, pages);
+    pages = await crawlPage(
+      baseURL,
+      nextURL,
+      pages,
+      maxUrls,
+      maxDepth,
+      depth + 1
+    );
   }
 
   return pages;
@@ -47,18 +71,12 @@ function getURLsFromHTML(htmlBody, baseURL) {
   const dom = new JSDOM(htmlBody);
   const aElements = dom.window.document.querySelectorAll("a");
   for (const aElement of aElements) {
-    if (aElement.href.slice(0, 1) === "/") {
-      try {
-        urls.push(new URL(aElement.href, baseURL).href);
-      } catch (err) {
-        console.log(`${err.message}: ${aElement.href}`);
-      }
-    } else {
-      try {
-        urls.push(new URL(aElement.href).href);
-      } catch (err) {
-        console.log(`${err.message}: ${aElement.href}`);
-      }
+    try {
+      // resolve every href against baseURL: handles absolute, root-relative
+      // (/path) and document-relative (index.html) links alike
+      urls.push(new URL(aElement.href, baseURL).href);
+    } catch (err) {
+      console.log(`${err.message}: ${aElement.href}`);
     }
   }
   return urls;

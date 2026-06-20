@@ -1,5 +1,5 @@
 const { test, expect } = require("@jest/globals");
-const { normalizeURL, getURLsFromHTML } = require("./crawl.js");
+const { normalizeURL, getURLsFromHTML } = require("../../utils/crawl.js");
 
 test("normalizeURL slash", () => {
   const url = "http://m.inpt.ac.ma/my";
@@ -86,15 +86,29 @@ test("getURLsFromHTML Both", () => {
   expect(actual).toEqual(expected);
 });
 
-test("getURLsFromHTML Invalid", () => {
+test("getURLsFromHTML relative file (resolved against base)", () => {
   const inputHTMLBody = `
     <html>
         <body>
-            <a href="invalid">
+            <a href="index.html">
                 Why Not
             </a>
+        </body>
+    </html>
+    `;
+  const inputBaseURL = "http://m.inpt.ac.ma";
+  const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL);
+  const expected = ["http://m.inpt.ac.ma/index.html"];
+  expect(actual).toEqual(expected);
+});
 
-
+test("getURLsFromHTML skips unparseable href", () => {
+  const inputHTMLBody = `
+    <html>
+        <body>
+            <a href="http://[invalid">
+                Broken
+            </a>
         </body>
     </html>
     `;
